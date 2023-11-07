@@ -34,6 +34,51 @@ app.get('/api/mio', async (req, res) => {
     }
 })
 
+app.get('/api/tags', async (req, res) => { // it`s working
+    try {
+      const db = await getDB();
+      const collection = db.collection('primerRelaxProject');
+      const tags = await collection.distinct('tags');
+
+      return res.status(200).json(tags);
+    } catch (error) {
+      return res.status(500).json({
+        msg: error.message
+      })
+    }
+})
+
+app.post('/api/getTagCollection', async (req, res) => {
+    try {
+      const db = await getDB();
+      const collection = db.collection('primerRelaxProject');
+      let filtro = req.body; // Ahora el filtro viene del cuerpo de la solicitud POST
+      let llave = Object.keys(filtro)[0];
+      let valor = filtro[llave];
+
+      if(llave === 'tags'){
+        const documentsCursor = await collection.find({
+          tags: {
+            $elemMatch: { $eq: valor }
+          }
+        });
+
+        const documentsArray = await documentsCursor.toArray();
+        console.log(`Found ${documentsArray.length} documents`);
+        return res.status(200).json(documentsArray);
+      } else {
+        console.log('The key is not "tags"');
+      }
+    } catch (error) {
+      return res.status(500).json({
+        msg: error.message
+      })
+    }
+})
+
+
+
+
 
 app.get('/api/dbname', async (req, res) => {
     try {
