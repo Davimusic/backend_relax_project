@@ -22,17 +22,18 @@ const getDB = async () => {
 
 app.get('/api/mio', async (req, res) => {
     try {
-        const db = await getDB();
-        return res.status(200).json({
-          msg: 'Ok',
-          dbName: 'db.databaseName'
-        })
-      } catch (error) {
-        return res.status(500).json({
-          msg: error.message
-        })
-      }
+      const db = await getDB();
+      const collection = db.collection('primerRelaxProject');
+      const data = await collection.find().toArray();
+
+      return res.status(200).json({ data })
+    } catch (error) {
+      return res.status(500).json({
+        msg: error.message
+      })
+    }
 })
+
 
 app.get('/api/dbname', async (req, res) => {
     try {
