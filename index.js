@@ -1,10 +1,12 @@
 const express = require('express')
 
 const app = express()
+const cors = require('cors');
 
 require('dotenv').config()
 
 app.use(express.json())
+app.use(cors());
 
 const connectDB = require('./connectMongo')
 //connectDB()
@@ -18,6 +20,7 @@ const getDB = async () => {
   }
   return db;
 };
+
 
 
 app.get('/api/mio', async (req, res) => {
