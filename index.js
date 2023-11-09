@@ -51,6 +51,26 @@ app.get('/api/tags', async (req, res) => { // it`s working
     }
 })
 
+
+app.get('/api/tipos', async (req, res) => {
+  console.log('Handling request to /api/tipos');
+  const db = await getDB();
+  const collection = db.collection('primerRelaxProject');
+
+  try {
+    const tags = await collection.distinct('tags');
+    return res.status(200).json(tags);
+  } catch (error) {
+    console.error('Error fetching tags:', error);
+    return res.status(500).json({
+      msg: error.message
+    });
+  }
+});
+
+
+
+
 app.post('/api/getTagCollection', async (req, res) => {
     try {
       const db = await getDB();
