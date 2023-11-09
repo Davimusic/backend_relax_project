@@ -51,22 +51,50 @@ app.get('/api/tags', async (req, res) => { // it`s working
     }
 })
 
-
-app.get('/api/tipos', async (req, res) => {
+app.post('/api/tipos', async (req, res) => {
   console.log('Handling request to /api/tipos');
   const db = await getDB();
   const collection = db.collection('primerRelaxProject');
 
-  try {
-    const tags = await collection.distinct('tags');
-    return res.status(200).json(tags);
-  } catch (error) {
-    console.error('Error fetching tags:', error);
-    return res.status(500).json({
-      msg: error.message
-    });
+  let filtro = req.body; // Ahora el filtro viene del cuerpo de la solicitud POST
+  let llave = Object.keys(filtro)[0];
+  let valor = filtro[llave];
+
+  if(llave === 'tags'){
+    try {
+      const tags = await collection.distinct('tags');
+
+      if(tags.includes(valor)) {
+        const documentsCursor = await collection.find({
+          tags: {
+            $elemMatch: { $eq: valor }
+          }
+        });
+
+        const documentsArray = await documentsCursor.toArray();
+        console.log(`Found ${documentsArray.length} documents`);
+        const responseObj = {
+          documentos: documentsArray,
+          llave: llave,
+          otroDato: valor,
+        };
+        return res.status(200).json(responseObj);
+      } else {
+        return res.status(404).json({
+          msg: 'Tag not found'
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+      return res.status(500).json({
+        msg: error.message
+      });
+    }
+  } else {
+    console.log('The key is not "tags"');
   }
 });
+
 
 
 
