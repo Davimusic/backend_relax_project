@@ -95,6 +95,33 @@ app.post('/api/tipos', async (req, res) => {
   }
 });
 
+app.post('/api/validateUser', async (req, res) => {
+  console.log('Handling request to /api/validateUser');
+  const db = await getDB();
+  const collection = db.collection('primerRelaxProject');
+
+  let { email, password } = req.body; // Now the email and password come from the body of the POST request
+
+  try {
+      const user = await collection.findOne({ email: email, password: password });
+
+      if(user) {
+          console.log(`User ${user.email} authenticated successfully`);
+          return res.status(200).json({ msg: 'User authenticated successfully' });
+      } else {
+          console.error('Error: Invalid email or password');
+          return res.status(404).json({ msg: 'Invalid email or password' });
+      }
+  } catch (error) {
+      console.error('Error:', error);
+      return res.status(500).json({ msg: error.message });
+  }
+});
+
+
+
+
+
 
 
 
@@ -127,10 +154,6 @@ app.post('/api/getTagCollection', async (req, res) => {
     }
 })
 
-
-
-
-
 app.get('/api/dbname', async (req, res) => {
     try {
       const db = await getDB();
@@ -144,9 +167,6 @@ app.get('/api/dbname', async (req, res) => {
       })
     }
 })
-
-
-
 
   app.get('/', async (req, res) => {
     try {
