@@ -1,6 +1,9 @@
 const express = require('express')
 //const cors = require('cors');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 const app = express()
+
 
 
 require('dotenv').config()
@@ -103,14 +106,21 @@ app.post('/api/validateUser', async (req, res) => {
   let { email, password } = req.body; // Now the email and password come from the body of the POST request
 
   try {
-      const user = await collection.findOne({ email: email, password: password });
+      const user = await collection.findOne({ email: email });
 
       if(user) {
-          console.log(`User ${user.email} authenticated successfully`);
-          return res.status(200).json({ msg: 'User authenticated successfully' });
+          bcrypt.compare(password, user.password, function(err, result) {
+              if(result) {
+                  console.log(`User ${user.email} authenticated successfully`);
+                  return res.status(200).json({ msg: 'User authenticated successfully' });
+              } else {
+                  console.error('Error: Invalid email or password');
+                  return res.status(404).json({ msg: 'Invalid email or password' });
+              }
+          });
       } else {
-          console.error('Error: Invalid email or password');
-          return res.status(404).json({ msg: 'Invalid email or password' });
+          console.error('Error: User not found');
+          return res.status(404).json({ msg: 'User not found' });
       }
   } catch (error) {
       console.error('Error:', error);
