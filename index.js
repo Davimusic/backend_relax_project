@@ -130,7 +130,7 @@ app.post('/api/validateUser', async (req, res) => {
 
 app.post('/api/createNewUser', async (req, res) => {
   console.log('Manejando solicitud a /api/createNewUser');
-  const db = await connectToDatabase();
+  const db = await getDB();
   const collection = db.collection('primerRelaxProject');
 
   let filtro = req.body; // Ahora el filtro viene del cuerpo de la solicitud POST
