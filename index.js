@@ -128,6 +128,55 @@ app.post('/api/validateUser', async (req, res) => {
   }
 });
 
+app.post('/api/createNewUser', async (req, res) => {
+  console.log('Manejando solicitud a /api/createNewUser');
+  const db = await connectToDatabase();
+  const collection = db.collection('primerRelaxProject');
+
+  let filtro = req.body; // Ahora el filtro viene del cuerpo de la solicitud POST
+  let llave = Object.keys(filtro)[0];
+  let valor = filtro[llave];
+
+  if(llave === 'email'){
+    try {
+      const emails = await collection.distinct('email');
+
+      if(emails.includes(valor)) {
+        return res.status(400).send(`${valor} ya existe`);
+      } else {
+        const hashedPassword = await bcrypt.hash(filtro['password'], saltRounds);
+        let document = {
+            email: valor,
+            password: hashedPassword
+        };
+
+        const result = await db.collection('primerRelaxProject').insertOne(document);
+
+        if (result.insertedId) {
+            const responseObj = {
+              msg: `${valor} fue creado exitosamente`,
+              llave: llave,
+              otroDato: valor,
+            };
+            return res.status(200).json(responseObj);
+        } else {
+            return res.status(500).json({
+              msg: `Ha habido un problema creando el nuevo usuario ${valor}, por favor intenta de nuevo`
+            });
+        }
+      }
+    } catch (error) {
+      console.error('Error insertando documento:', error);
+      return res.status(500).json({
+        msg: error.message
+      });
+    }
+  } else {
+    console.log('La llave no es "email"');
+  }
+});
+
+
 
 
 
